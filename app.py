@@ -25,40 +25,74 @@ def text2speech(text: str, speed: int):
     return waveform[0], resample_rate
 
 
-def response_weather(request: int):
-    if request == 0:
-        weather = "Hôm nay trời nắng, nhiệt độ ba mươi độ."
-    elif request == 1:
-        weather = "Ngày mai trời mưa, nhiệt độ khoảng 'hai mươi lăm' độ."
-    elif request == 2:
-        weather = "Trong ba ngày tới, trời nắng gắt, nhiệt độ trung bình là 'ba mươi bốn' độ."
+def response_weather(day: str, location: str):
+    if day == 0:
+        if location == "HCM":
+            weather = "Thành phố Hồ Chí Minh hôm nay trời nắng, nhiệt độ ba mươi độ."
+        elif location == "HN":
+            weather = "Hôm nay trời mưa, nhiệt độ hai mươi lăm độ."
+        else:
+            weather = "Xin lỗi, trung tâm không thể cung cấp thông tin về thành phố này."
+    elif day == 1:
+        if location == "HCM":
+            weather = "Ngày mai trời nắng râm, nhiệt độ khoảng 'hai mươi tám' độ."
+        elif location == "HN":
+            weather = "Thành phố Hà Nội ngày mai trời mưa lớn, nhiệt độ khoảng 'hai mươi ba' độ."
+        else:
+            weather = "Xin lỗi, trung tâm không thể cung cấp thông tin về thành phố này."
+    elif day == 2:
+        if location == "HCM":
+            weather = "Trong ba ngày tới ở thành phố Hồ Chí Minh, có lúc nắng gắt lúc râm mát, nhiệt độ trung bình là 'ba mươi mốt' độ."
+        elif location == "HN":
+            weather = "Trong ba ngày tới ở Hà Nội, trời mưa nhiều, nhiệt độ trung bình là 'hai mươi tám' độ."
+        else: 
+            weather = "Xin lỗi, trung tâm không thể cung cấp thông tin về thành phố này."
     else:
-        weather = "Không rõ yêu cầu của bạn. Vui lòng nhập lại."
+        weather = f"Xin lỗi, trung tâm không thể cung cấp thông tin cho yêu cầu này. {day} - {location}"
     return weather
 
 
-st.title("Dự báo thời tiết")
+st.title("If-Else with Text-to-Speech (TTS)")
+st.subheader("TTS model: [facebook/mms-tts-vie](https://huggingface.co/facebook/mms-tts-vie)")
 
-intro = """Đây là trung tâm dự báo thời tiết của Việt Nam.
+st.header("Dự báo thời tiết") 
+
+intro_1 = """Đây là trung tâm dự báo thời tiết của Việt Nam.
 - Nhập không nếu bạn muốn biết thời tiết hiện tại.
 - Nhập một nếu bạn muốn biết thời tiết trong một ngày tới.
 - Nhập hai nếu bạn muốn biết thời tiết trong ba ngày tới.
 """
-waveform, rate = text2speech(intro, SPEED)
-st.text(intro)
+
+intro_2 = "Bạn muốn biết thời tiết ở đâu? Thành phố Hồ Chí Minh hay Hà Nội?"
+
+waveform, rate = text2speech(intro_1, SPEED)
 st.audio(waveform.numpy(), sample_rate=rate)
+st.text(intro_1)
+
+day = None
+location = None
+weather = None
+
+day = st.number_input("Your input number is:", min_value=0, max_value=2, value=0)
+if st.button("Submit day"):
+    if day in [0, 1, 2]:
+        waveform, rate = text2speech(intro_2, SPEED)
+        st.audio(waveform.numpy(), sample_rate=rate)
+        st.text(intro_2)
+    else:
+        st.warning("Day must be 0, 1, or 2.")
 
 
-number = None
-number = st.number_input("Your input number is:",
-                         min_value=0, max_value=2, value=0)
+location = st.text_input("Your input location is (HCM, HN): ")
+if st.button("Submit location"):
+    weather = response_weather(day, location)
 
-if st.button("Submit"):
-    if number is not None:
-        weather = response_weather(number)
+    if location in ["HCM", "HN"]:
+        weather = response_weather(day, location)
         with st.spinner("Generating audio..."):
             waveform, rate = text2speech(weather, SPEED)
             st.audio(waveform.numpy(), sample_rate=rate)
             st.text(weather)
+
     else:
-        st.warning("Please input a number before generating response.")
+        st.warning("Location must be HCM or HN.")
