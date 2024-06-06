@@ -66,7 +66,7 @@ intro_1 = """Đây là trung tâm dự báo thời tiết của Việt Nam.
 intro_2 = "Bạn muốn biết thời tiết ở đâu? Thành phố Hồ Chí Minh hay Hà Nội?"
 
 waveform, rate = text2speech(intro_1, SPEED)
-st.audio(waveform.numpy(), sample_rate=rate, autoplay=True)
+st.audio(waveform.numpy(), sample_rate=rate)
 st.text(intro_1)
 
 day = None
@@ -77,7 +77,7 @@ day = st.number_input("Your input number is:", min_value=0, max_value=2, value=0
 if st.button("Submit day"):
     if day in [0, 1, 2]:
         waveform, rate = text2speech(intro_2, SPEED)
-        st.audio(waveform.numpy(), sample_rate=rate, autoplay=True)
+        st.audio(waveform.numpy(), sample_rate=rate)
         st.text(intro_2)
     else:
         st.warning("Day must be 0, 1, or 2.")
@@ -91,7 +91,7 @@ if st.button("Submit location"):
         weather = response_weather(day, location)
         with st.spinner("Generating audio..."):
             waveform, rate = text2speech(weather, SPEED)
-            st.audio(waveform.numpy(), sample_rate=rate, autoplay=True)
+            st.audio(waveform.numpy(), sample_rate=rate)
             st.text(weather)
 
     else:
